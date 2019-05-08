@@ -1,8 +1,8 @@
 import glob
 from PIL import Image
 
-def transparent(image, color: (int, int, int)):
-    img = Image.open(image)
+def transparent(img, color: (int, int, int)):
+    img = Image.open(img)
     img = img.convert("RGBA")
 
     pixdata = img.load()
@@ -13,13 +13,14 @@ def transparent(image, color: (int, int, int)):
             if pixdata[x, y][:3] == color:
                 pixdata[x, y] = (255, 255, 255, 0)
 
-    img.save(image, "PNG")
+    img.save(img, "PNG")
 
 
-def main()
-for image in glob.glob("*.png"):
-    transparent(image)
+def main(color: (int, int, int))
+    for image in glob.glob("*.png"):
+        transparent(image, color)
 
 
 if __name__ == "__main__":
-    main()
+    color = (255, 255, 255)
+    main(color)
