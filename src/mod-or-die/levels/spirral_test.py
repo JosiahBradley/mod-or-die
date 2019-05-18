@@ -1,5 +1,5 @@
 import arcade
-from tools.funcs import rand_range, scale_generator
+from src.tools.funcs import rand_range, scale_generator
 import math
 from random import random
 

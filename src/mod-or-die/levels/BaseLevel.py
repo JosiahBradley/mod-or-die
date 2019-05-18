@@ -1,27 +1,36 @@
 from abc import ABC, abstractmethod
-import arcade
-import os
 from typing import List, Dict
-from tools.funcs import scale_generator
+import os
+# os.environ['LD_LIBRARY_PATH'] = os.path.abspath(os.getcwd())
+# from ctypes import cdll
+# cdll.LoadLibrary("libavutil.so")
+# cdll.LoadLibrary("libswresample.so")
+# cdll.LoadLibrary("libswresample.so")
+# cdll.LoadLibrary("libavcodec.so.56")
+import arcade
 
-SCREEN_WIDTH = 1280
-SCREEN_HEIGHT = 960
-TILE_RADIUS = 64
 
-# Resources
-FILE_ROOT = os.path.dirname(__file__)
-SPRITE_RESOURCES = os.path.abspath(FILE_ROOT + "/../../resources/arcade/character_sprites/")
-AUDIO_RESOURCES = os.path.abspath(FILE_ROOT + "/../../resources/audio/")
-TILE_RESOURCES = os.path.abspath(FILE_ROOT + "/../../resources/arcade/tiles/")
+class Conf():
+    def __init__(self):
+        self.SCREEN_WIDTH = 1280
+        self.SCREEN_HEIGHT = 960
+        self.TILE_RADIUS = 64
 
-# How many pixels to keep as a minimum margin between the character
-# and the edge of the screen.
-LEFT_VIEWPORT_MARGIN = 300
-RIGHT_VIEWPORT_MARGIN = 300
-BOTTOM_VIEWPORT_MARGIN = 150
-TOP_VIEWPORT_MARGIN = 100
+        # Resources
+        self.FILE_ROOT = os.path.dirname(__file__)
+        self.SPRITE_RESOURCES = os.path.abspath(self.FILE_ROOT + "/../../resources/arcade/character_sprites/")
+        self.AUDIO_RESOURCES = os.path.abspath(self.FILE_ROOT + "/../../resources/audio/")
+        self.TILE_RESOURCES = os.path.abspath(self.FILE_ROOT + "/../../resources/arcade/tiles/")
 
-PLAYER_START_X, PLAYER_START_Y = (200, 200)
+        # How many pixels to keep as a minimum margin between the character
+        # and the edge of the screen.
+        self.LEFT_VIEWPORT_MARGIN = 300
+        self.RIGHT_VIEWPORT_MARGIN = 300
+        self.BOTTOM_VIEWPORT_MARGIN = 150
+        self.TOP_VIEWPORT_MARGIN = 100
+
+        self.PLAYER_START_X, self.PLAYER_START_Y = (200, 200)
+
 
 class Player(arcade.Sprite, ABC):
     pass
@@ -39,7 +48,9 @@ class BaseLevel(arcade.Window, metaclass=MetaLevel):
     """
 
     def __init__(self, title: str="LEVEL", gravity: float=1.0, speed: float=20.0, map: Dict[int, Dict]=None):
-        super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, title)
+        self.conf = Conf()
+        super().__init__(self.conf.SCREEN_WIDTH, self.conf.SCREEN_HEIGHT, title)
+
 
         self.object_list = None
         self.block_list = None
@@ -74,10 +85,10 @@ class BaseLevel(arcade.Window, metaclass=MetaLevel):
         self.player_list = arcade.SpriteList()
 
         self.player = Player()
-        self.player.center_x, self.player.center_y = (PLAYER_START_X, PLAYER_START_Y)
-        self.player.texture = arcade.load_texture(SPRITE_RESOURCES + "/character0.png")
+        self.player.center_x, self.player.center_y = (self.conf.PLAYER_START_X, self.conf.PLAYER_START_Y)
+        self.player.texture = arcade.load_texture(self.conf.SPRITE_RESOURCES + "/character0.png")
 
-        self.jump_sound = arcade.load_sound(AUDIO_RESOURCES + "/jump1.wav")
+        self.jump_sound = arcade.load_sound(self.conf.AUDIO_RESOURCES + "/jump1.wav")
 
         self.player_list.append(self.player)
 
@@ -92,18 +103,18 @@ class BaseLevel(arcade.Window, metaclass=MetaLevel):
 
     @abstractmethod
     def draw_map(self):
-        wall = arcade.Sprite(TILE_RESOURCES + "/grassLeft.png")
+        wall = arcade.Sprite(self.conf.TILE_RESOURCES + "/grassLeft.png")
         wall.center_x = 0
-        wall.center_y = TILE_RADIUS
+        wall.center_y = self.conf.TILE_RADIUS
         self.block_list.append(wall)
-        for x in range(2 * TILE_RADIUS, 10 * 2 * TILE_RADIUS, 2 * TILE_RADIUS):
-            wall = arcade.Sprite(TILE_RESOURCES + "/grassMid.png")
+        for x in range(2 * self.conf.TILE_RADIUS, 10 * 2 * self.conf.TILE_RADIUS, 2 * self.conf.TILE_RADIUS):
+            wall = arcade.Sprite(self.conf.TILE_RESOURCES + "/grassMid.png")
             wall.center_x = x
-            wall.center_y = TILE_RADIUS
+            wall.center_y = self.conf.TILE_RADIUS
             self.block_list.append(wall)
-        wall = arcade.Sprite(TILE_RESOURCES + "/grassRight.png")
-        wall.center_x = 10 * 2 * TILE_RADIUS
-        wall.center_y = TILE_RADIUS
+        wall = arcade.Sprite(self.conf.TILE_RESOURCES + "/grassRight.png")
+        wall.center_x = 10 * 2 * self.conf.TILE_RADIUS
+        wall.center_y = self.conf.TILE_RADIUS
         self.block_list.append(wall)
 
     @abstractmethod
@@ -160,7 +171,7 @@ class BaseLevel(arcade.Window, metaclass=MetaLevel):
         # Prevent walking off the left side
         if self.player.left <= 0:
             self.player.change_x = 0
-            self.player.center_x = TILE_RADIUS
+            self.player.center_x = self.conf.TILE_RADIUS
 
         # Kill player if they fall into a pit
         if self.player.bottom < 0:
@@ -171,25 +182,25 @@ class BaseLevel(arcade.Window, metaclass=MetaLevel):
         changed = False
 
         # Scroll left
-        left_boundary = self.view_left + LEFT_VIEWPORT_MARGIN
+        left_boundary = self.view_left + self.conf.LEFT_VIEWPORT_MARGIN
         if self.player.left < left_boundary:
             self.view_left -= left_boundary - self.player.left
             changed = True
 
         # Scroll right
-        right_boundary = self.view_left + SCREEN_WIDTH - RIGHT_VIEWPORT_MARGIN
+        right_boundary = self.view_left + self.conf.SCREEN_WIDTH - self.conf.RIGHT_VIEWPORT_MARGIN
         if self.player.right > right_boundary:
             self.view_left += self.player.right - right_boundary
             changed = True
 
         # Scroll up
-        top_boundary = self.view_bottom + SCREEN_HEIGHT - TOP_VIEWPORT_MARGIN
+        top_boundary = self.view_bottom + self.conf.SCREEN_HEIGHT - self.conf.TOP_VIEWPORT_MARGIN
         if self.player.top > top_boundary:
             self.view_bottom += self.player.top - top_boundary
             changed = True
 
         # Scroll down
-        bottom_boundary = self.view_bottom + BOTTOM_VIEWPORT_MARGIN
+        bottom_boundary = self.view_bottom + self.conf.BOTTOM_VIEWPORT_MARGIN
         if self.player.bottom < bottom_boundary:
             self.view_bottom -= bottom_boundary - self.player.bottom
             changed = True
@@ -202,11 +213,11 @@ class BaseLevel(arcade.Window, metaclass=MetaLevel):
 
             # Do the scrolling
             arcade.set_viewport(self.view_left,
-                                SCREEN_WIDTH + self.view_left,
+                                self.conf.SCREEN_WIDTH + self.view_left,
                                 self.view_bottom,
-                                SCREEN_HEIGHT + self.view_bottom)
+                                self.conf.SCREEN_HEIGHT + self.view_bottom)
 
     def game_over(self):
         # self.physics_engine = None
-        arcade.play_sound(arcade.load_sound(AUDIO_RESOURCES + "/gameover2.wav"))
+        arcade.play_sound(arcade.load_sound(self.conf.AUDIO_RESOURCES + "/gameover2.wav"))
         self.setup()

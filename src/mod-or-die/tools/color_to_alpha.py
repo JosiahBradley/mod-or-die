@@ -16,7 +16,7 @@ def transparent(img, color: (int, int, int)):
     img.save(img, "PNG")
 
 
-def main(color: (int, int, int))
+def main(color: (int, int, int)):
     for image in glob.glob("*.png"):
         transparent(image, color)
 
