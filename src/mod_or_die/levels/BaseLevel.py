@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import List, Dict
 import os
+from importlib.resources import read_binary
 # os.environ['LD_LIBRARY_PATH'] = os.path.abspath(os.getcwd())
 # from ctypes import cdll
 # cdll.LoadLibrary("libavutil.so")
@@ -18,9 +19,9 @@ class Conf():
 
         # Resources
         self.FILE_ROOT = os.path.dirname(__file__)
-        self.SPRITE_RESOURCES = os.path.abspath(self.FILE_ROOT + "/../../resources/arcade/character_sprites/")
-        self.AUDIO_RESOURCES = os.path.abspath(self.FILE_ROOT + "/../../resources/audio/")
-        self.TILE_RESOURCES = os.path.abspath(self.FILE_ROOT + "/../../resources/arcade/tiles/")
+        self.SPRITE_RESOURCES = os.path.abspath(self.FILE_ROOT + "/../resources/arcade/character_sprites/")
+        self.AUDIO_RESOURCES = os.path.abspath(self.FILE_ROOT + "/../resources/audio/")
+        self.TILE_RESOURCES = os.path.abspath(self.FILE_ROOT + "/../resources/arcade/tiles/")
 
         # How many pixels to keep as a minimum margin between the character
         # and the edge of the screen.
