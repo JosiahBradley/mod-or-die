@@ -1,0 +1,13 @@
+From the project directory:
+
+# activate the virtual environment
+source venv/bin/activate
+
+pip install setuptools wheels
+pip install -r requirements.txt
+
+# This will build the game
+rm -rf build/* && python setup.py sdist bdist_wheel && python setup.py build && python setup.py install
+
+# This runs the game
+play

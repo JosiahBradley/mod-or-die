@@ -1,13 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import List, Dict
 import os
-from importlib.resources import read_binary
-# os.environ['LD_LIBRARY_PATH'] = os.path.abspath(os.getcwd())
-# from ctypes import cdll
-# cdll.LoadLibrary("libavutil.so")
-# cdll.LoadLibrary("libswresample.so")
-# cdll.LoadLibrary("libswresample.so")
-# cdll.LoadLibrary("libavcodec.so.56")
 import arcade
 
 

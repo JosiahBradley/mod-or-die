@@ -1,7 +1,15 @@
 import setuptools
+import os
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
+
+data_files = []
+for root, dirs, files in os.walk('src/mod_or_die/resources/arcade/'):
+    ff = []
+    for file in files:
+        ff.append(os.path.join(root, file))
+    data_files.append((root, ff))
 
 setuptools.setup(
     author='Josiah Bradley',
@@ -16,6 +24,7 @@ setuptools.setup(
     package_dir={'': 'src'},
     packages=setuptools.find_packages('src'),
     include_package_data=True,
+    data_files=data_files,
     long_description=long_description,
     long_description_content_type="text/markdown",
     classifiers=[
