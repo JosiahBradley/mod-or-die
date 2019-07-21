@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 data_files = []
-for root, dirs, files in os.walk('src/mod_or_die/resources/arcade/'):
+for root, dirs, files in os.walk('src/mod_or_die/resources/arcade'):
     ff = []
     for file in files:
         ff.append(os.path.join(root, file))
