@@ -4,7 +4,7 @@ import os
 import arcade
 
 
-class Conf():
+class Conf:
     def __init__(self):
         self.SCREEN_WIDTH = 1280
         self.SCREEN_HEIGHT = 960
@@ -45,11 +45,13 @@ class BaseLevel(arcade.Window, metaclass=MetaLevel):
         self.conf = Conf()
         super().__init__(self.conf.SCREEN_WIDTH, self.conf.SCREEN_HEIGHT, title)
 
-
-        self.object_list = None
-        self.block_list = None
-        self.enemy_list = None
-        self.player_list = None
+        self.assets = {
+            "statics": None,
+            "objects": None,
+            "block": None,
+            "enemy": None,
+            "player": None,
+        }
 
         self.player = None
 
@@ -73,18 +75,16 @@ class BaseLevel(arcade.Window, metaclass=MetaLevel):
         arcade.set_background_color(arcade.color.SKY_BLUE)
 
     def setup(self):
-        self.object_list = arcade.SpriteList()
-        self.block_list = arcade.SpriteList()
-        self.enemy_list = arcade.SpriteList()
-        self.player_list = arcade.SpriteList()
+        for k in self.assets.keys():
+            self.assets[k] = arcade.SpriteList()
 
         self.player = Player()
         self.player.center_x, self.player.center_y = (self.conf.PLAYER_START_X, self.conf.PLAYER_START_Y)
-        self.player.texture = arcade.load_texture(self.conf.SPRITE_RESOURCES + "/character0.png")
+        self.player.texture = self.a_tex("character0")
 
-        self.jump_sound = arcade.load_sound(self.conf.AUDIO_RESOURCES + "/jump1.wav")
+        self.jump_sound = self.audio("jump1")
 
-        self.player_list.append(self.player)
+        self.assets["player"].append(self.player)
 
         if self.map:
             self._init_map()
@@ -92,24 +92,40 @@ class BaseLevel(arcade.Window, metaclass=MetaLevel):
             self.draw_map()
 
         self.physics_engine = arcade.PhysicsEnginePlatformer(self.player,
-                                                             self.block_list,
+                                                             self.assets["block"],
                                                              self.gravity)
 
     @abstractmethod
     def draw_map(self):
-        wall = arcade.Sprite(self.conf.TILE_RESOURCES + "/grassLeft.png")
+        wall = self.tile_sprite("grassLeft")
         wall.center_x = 0
         wall.center_y = self.conf.TILE_RADIUS
-        self.block_list.append(wall)
-        for x in range(2 * self.conf.TILE_RADIUS, 10 * 2 * self.conf.TILE_RADIUS, 2 * self.conf.TILE_RADIUS):
-            wall = arcade.Sprite(self.conf.TILE_RESOURCES + "/grassMid.png")
+        self.assets["block"].append(wall)
+        for x in range(2 * self.conf.TILE_RADIUS, 100 * 2 * self.conf.TILE_RADIUS, 2 * self.conf.TILE_RADIUS):
+            wall = self.tile_sprite("grassMid")
             wall.center_x = x
             wall.center_y = self.conf.TILE_RADIUS
-            self.block_list.append(wall)
-        wall = arcade.Sprite(self.conf.TILE_RESOURCES + "/grassRight.png")
-        wall.center_x = 10 * 2 * self.conf.TILE_RADIUS
+            self.assets["block"].append(wall)
+        wall = self.tile_sprite("grassRight")
+        wall.center_x = 100 * 2 * self.conf.TILE_RADIUS
         wall.center_y = self.conf.TILE_RADIUS
-        self.block_list.append(wall)
+        self.assets["block"].append(wall)
+
+    @staticmethod
+    def sprite(path, name):
+        return arcade.Sprite(path + '/' + name + ".png")
+
+    def audio(self, name):
+        return arcade.load_sound(self.conf.AUDIO_RESOURCES + '/' + name + ".wav")
+
+    def a_sprite(self, name):
+        return self.sprite(self.conf.SPRITE_RESOURCES, name)
+
+    def a_tex(self, name):
+        return arcade.load_texture(self.conf.SPRITE_RESOURCES + '/' + name + ".png")
+
+    def tile_sprite(self, name):
+        return self.sprite(self.conf.TILE_RESOURCES, name)
 
     @abstractmethod
     def on_draw(self):
@@ -119,15 +135,17 @@ class BaseLevel(arcade.Window, metaclass=MetaLevel):
         arcade.start_render()
 
         # Draw our sprites
-        self.block_list.draw()
-        self.object_list.draw()
-        self.enemy_list.draw()
-        self.player_list.draw()
+        for k in self.assets.keys():
+            self.assets[k].draw()
 
         # Draw our score on the screen, scrolling it with the viewport
         score_text = f"Score: {self.score}"
-        arcade.draw_text(score_text, 10 + self.view_left, 10 + self.view_bottom,
-                         arcade.csscolor.WHITE, 18)
+        arcade.draw_text(
+            score_text,
+            self.view_left + .8 * self.get_size()[0],
+            self.view_bottom + .95 * self.get_size()[1],
+            arcade.csscolor.WHITE, 18
+        )
 
     def on_key_press(self, key, modifiers):
         """Called whenever a key is pressed. """
@@ -157,8 +175,8 @@ class BaseLevel(arcade.Window, metaclass=MetaLevel):
         # example though.)
         self.physics_engine.update()
 
-        self.player_list.update()
-        self.player_list.update_animation()
+        self.assets["player"].update()
+        self.assets["player"].update_animation()
 
         # --- Manage Scrolling ---
 
@@ -213,5 +231,11 @@ class BaseLevel(arcade.Window, metaclass=MetaLevel):
 
     def game_over(self):
         # self.physics_engine = None
-        arcade.play_sound(arcade.load_sound(self.conf.AUDIO_RESOURCES + "/gameover2.wav"))
+        self.audio("gameover2")
         self.setup()
+
+    @abstractmethod
+    def win(self):
+        self.is_game_over = True
+        for k in self.assets.keys():
+            self.assets[k] = arcade.SpriteList()
