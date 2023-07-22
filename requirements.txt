@@ -1,5 +1,5 @@
 arcade==2.0.9
-future==0.17.1
+future==0.18.3
 numpy==1.16.3
 Pillow==6.0.0
 pyglet==1.4.0b1
